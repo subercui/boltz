@@ -7,8 +7,8 @@
 
 ## Chat History Summary
 
-### Session 1 - Installation Verification & Training Analysis (2025-07-28)
-- **Context**: Initial setup verification and training architecture analysis for Boltz1 reproduction project
+### Session 1 - Installation Verification & Training Setup (2025-07-28)
+- **Context**: Initial setup verification and successful training setup for Boltz1 reproduction project
 - **Key Actions**:
   - Verified Python 3.11.13 environment with `uv` management
   - Confirmed Boltz 1.0.0 package installation
@@ -17,12 +17,17 @@
   - Verified development tools: pytest and ruff installed and functional
   - **Analyzed training configurations**: full.yaml, structure.yaml, confidence.yaml
   - **Studied training pipeline**: Lightning-based with Hydra configs
+  - **Downloaded training data**: RCSB processed targets & MSAs (~250GB)
+  - **Created pilot config**: `scripts/train/configs/pilot_structure_train.yaml`
+  - **Fixed PyTorch 2.7 compatibility**: Updated LRScheduler for verbose parameter removal
+  - **Successfully tested training**: Debug mode works with 180K train/550 val samples
 
 - **Key Decisions**:
   - Use `uv pip install` for dependency management (not regular pip)
   - Environment activation: `source .venv/bin/activate`
   - Focus on learning/reproduction rather than production deployment
   - **Training approach**: Two-stage (structure-only → confidence) or full end-to-end
+  - **Data setup**: RCSB only (ignoring OpenFold for now)
 
 - **Technical Findings**:
   - Core layer tests (outer_product_mean, triangle_attention) pass
@@ -33,19 +38,30 @@
     - Structure-only: 20 sampling steps (fast), no confidence
     - Confidence-only: Requires pretrained structure model
     - Full: 200 sampling steps, both structure + confidence
+  - **Model**: 439M trainable parameters, runs on NVIDIA RTX A6000
+  - **Data**: 180,540 training samples, 550 validation samples loaded successfully
 
 ## Todo List
 
 ### Current Planning
 - ✅ Environment setup and verification complete
-- 🔄 Ready for next development tasks (pending user direction)
+- ✅ Training data downloaded and configured (180K samples)
+- ✅ Debug training verified working (439M params model)
+- 🔄 **READY**: Full structure training ready to launch
 
-### Pending Tasks
-- Explore core model architecture (`src/boltz/model/model.py`)
-- Understand data pipeline (`src/boltz/data/`)
-- Review training configurations (`scripts/train/configs/`)
-- Potentially fix some code style issues with ruff
-- Download and test with model weights for full regression testing
+### Completed Tasks
+- ✅ Explore core model architecture (`src/boltz/model/model.py`)
+- ✅ Understand data pipeline (`src/boltz/data/`)
+- ✅ Review training configurations (`scripts/train/configs/`)
+- ✅ Create pilot training config with real data paths
+- ✅ Fix PyTorch 2.7 compatibility issues
+- ✅ Test training pipeline with real data
+
+### Next Steps
+- 🎯 **Launch full structure training**: `python scripts/train/train.py scripts/train/configs/pilot_structure_train.yaml`
+- 📊 Monitor training metrics and progress
+- 🔧 Optional: Enable wandb logging for better monitoring
+- 📈 Train confidence model after structure training completes
 
 ### Data Requirements (from docs/training.md)
 **Pre-processed Datasets** (~250GB total):

@@ -1,7 +1,7 @@
 trainer:
   accelerator: gpu
   devices: 1
-  precision: 32
+  precision: 32 # bf16-mixed # Enable BF16 mixed precision training. Interestingly, the precision can not be set, otherwise there is the error linalg.svd: (Batch element 0) not converge because the input matrix is ill-conditioned or has too many repeated singular values (error code: 3).
   gradient_clip_val: 10.0
   max_epochs: -1
 
@@ -14,7 +14,8 @@ trainer:
 output: ./checkpoints/pilot_structure
 resume: null
 disable_checkpoint: false
-matmul_precision: null
+# matmul_precision: null
+matmul_precision: high # Set to 'medium' or 'high' for Tensor Core optimization. Batchsize 2: when set this to medium, using 68% peak memory; when set to high, using 66% peak memory; when set to null, using 68% peak memory. So this may needed to be set in use with the precision set for mixed precision training.
 save_top_k: -1
 
 data:
@@ -40,21 +41,21 @@ data:
       ref: released
     - _target_: boltz.data.filter.dynamic.resolution.ResolutionFilter
       resolution: 9.0
-  
+
   tokenizer:
     _target_: boltz.data.tokenize.boltz.BoltzTokenizer
   featurizer:
     _target_: boltz.data.feature.featurizer.BoltzFeaturizer
 
   symmetries: ./symmetry.pkl
-  max_tokens: 512
-  max_atoms: 4608
+  max_tokens: 256
+  max_atoms: 2304
   max_seqs: 2048
   pad_to_max_tokens: true
   pad_to_max_atoms: true
   pad_to_max_seqs: true
   samples_per_epoch: 100000
-  batch_size: 1
+  batch_size: 2
   num_workers: 4
   random_seed: 42
   pin_memory: true
