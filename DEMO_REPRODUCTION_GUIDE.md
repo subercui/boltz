@@ -49,9 +49,10 @@ demos/
 
 Each demo contains:
 - `README.md` - Detailed explanation and results
-- `visualize_*.py` - Custom visualization script
+- `visualize_*.py` - Custom 2D visualization script
+- `3d_visualization.ipynb` - Interactive 3D Jupyter notebook
 - `output/` - Prediction results and structures
-- `*.png` - Generated visualization files
+- `*.png` - Generated 2D visualization files
 
 # Individual Demo Instructions
 
@@ -78,14 +79,18 @@ demo_output/boltz_results_ligand/
 └── processed/                      # Intermediate files
 ```
 
-# Run visualization
+# Generate 2D visualizations
 python visualize_demo_simple.py
+
+# Launch interactive 3D visualization
+jupyter notebook 3d_visualization.ipynb
 ```
 
 **Key Results:**
 - 92.2% overall confidence (near-experimental accuracy)
 - Excellent protein-ligand binding prediction (94.4% iPTM)
 - Multi-modal input: CCD codes + SMILES strings
+- Interactive 3D views: protein chains, ligand binding sites, confidence coloring
 
 ## Demo 2: Single Protein Structure
 
@@ -99,14 +104,18 @@ source ../../.venv/bin/activate
 # Run prediction (takes ~30 seconds)
 boltz predict ../../examples/prot.yaml --use_msa_server --out_dir output
 
-# Generate visualizations
+# Generate 2D visualizations
 python visualize_protein.py
+
+# Launch interactive 3D visualization
+jupyter notebook 3d_visualization.ipynb
 ```
 
 **Key Results:**
 - 81.1% overall confidence (good quality prediction)
 - Single chain, 120 amino acids
 - Demonstrates core protein folding capability
+- 3D views: secondary structure coloring, surface representation, confidence mapping
 
 ## Demo 3: Protein Multimer Complex
 
@@ -120,14 +129,18 @@ source ../../.venv/bin/activate
 # Run prediction (takes ~1 minute)
 boltz predict ../../examples/multimer.yaml --use_msa_server --out_dir output
 
-# Generate visualizations
+# Generate 2D visualizations
 python visualize_multimer.py
+
+# Launch interactive 3D visualization
+jupyter notebook 3d_visualization.ipynb
 ```
 
 **Key Results:**
 - 82.5% overall confidence (excellent complex prediction)
 - **83.6% iPTM** - Outstanding protein-protein interface prediction
 - Two-chain complex with asymmetric quality (91.3% vs 73.5%)
+- 3D views: chain differentiation, interface analysis, interaction surfaces
 
 ## Demo 4: Custom MSA Comparison
 
@@ -141,14 +154,18 @@ source ../../.venv/bin/activate
 # Run prediction with custom MSA (takes ~25 seconds)
 boltz predict prot_custom_msa_fixed.yaml --out_dir output
 
-# Generate comparative visualizations  
+# Generate 2D comparative visualizations  
 python visualize_custom_msa.py
+
+# Launch interactive 3D visualization
+jupyter notebook 3d_visualization.ipynb
 ```
 
 **Key Results:**
 - 69.1% overall confidence (moderate quality)
 - **12% lower** than MSA server (demonstrates MSA importance)
 - Same protein as single_protein demo for direct comparison
+- 3D views: MSA quality impact visualization, confidence comparisons, regional analysis
 
 ## Demo 5: Pocket Constraints
 
@@ -166,7 +183,9 @@ python visualize_custom_msa.py
 
 # Visualization Gallery
 
-Each demo generates publication-quality visualizations tailored to its biological system:
+Each demo generates both 2D publication-quality visualizations and interactive 3D molecular views:
+
+## 2D Visualizations (PNG Files)
 
 ### Protein-Ligand Complex
 - `demo_confidence_detailed.png` - 4-panel analysis with interaction matrix
@@ -184,6 +203,58 @@ Each demo generates publication-quality visualizations tailored to its biologica
 ### Custom MSA
 - `msa_comparison.png` - Side-by-side MSA server vs custom MSA comparison
 - `msa_performance_analysis.png` - Detailed performance breakdown with quality bands
+
+## 3D Interactive Visualizations (Jupyter Notebooks)
+
+### Requirements
+```bash
+# Install 3D visualization dependencies
+source .venv/bin/activate
+pip install py3Dmol jupyter
+```
+
+### Features Available in All Demos
+- **Interactive 3D Structure**: Mouse controls for rotation, zoom, pan
+- **Confidence Coloring**: Color-coded by prediction quality (Blue=high, Yellow=medium, Red=low)
+- **Multiple Views**: Basic structure, surface representation, confidence mapping
+- **High-Quality Export**: Right-click to save images for publications
+- **Biological Context**: Detailed analysis and interpretation in notebook
+
+### Demo-Specific 3D Features
+
+**Protein-Ligand Complex:**
+- Multi-chain protein visualization (light blue/green)
+- Ligand highlighting (red SAH, orange tyrosine)
+- Binding site focused views
+- Interface surface analysis
+
+**Single Protein:**
+- Secondary structure coloring (red α-helices, yellow β-sheets)
+- Molecular surface with hydrophobicity
+- Confidence thickness variation (putty representation)
+- N/C terminus labeling
+
+**Protein Multimer:**
+- Chain differentiation (blue Chain A, green Chain B)
+- Interface surface highlighting
+- Asymmetric quality visualization
+- Interaction contact analysis
+
+**Custom MSA:**
+- MSA quality impact visualization
+- Comparison indicators vs MSA server
+- Regional confidence analysis
+- Educational MSA importance demonstration
+
+### Usage Instructions
+1. Navigate to any demo folder
+2. Run: `jupyter notebook 3d_visualization.ipynb`
+3. Execute all cells to generate interactive views
+4. Use mouse to explore structures:
+   - **Left click + drag**: Rotate
+   - **Right click + drag**: Pan
+   - **Scroll wheel**: Zoom
+   - **Double click**: Center on atom
 
 # Biological Systems Overview
 
