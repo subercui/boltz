@@ -28,6 +28,9 @@ dependencies = [
     "pyyaml==6.0.2",
     "biopython==1.84",
     "scipy==1.13.1",
+    "py3dmol>=2.5.2",
+    "plotly>=6.2.0",
+    "jupyter>=1.1.1",
 ]
 
 [project.scripts]
