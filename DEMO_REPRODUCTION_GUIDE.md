@@ -1,13 +1,18 @@
-# Boltz1 Demo Reproduction Guide
+# Boltz1 Demo Suite Reproduction Guide
 
-This guide documents the complete process for creating a professional Boltz1 protein-ligand complex prediction demo for presentations.
+This guide documents the complete process for creating professional Boltz1 structure prediction demonstrations covering multiple use cases and biological systems.
 
-## Overview
+## Demo Suite Overview
 
-**Demo Type**: Protein-ligand complex prediction  
-**Runtime**: ~3 minutes inference + 1 minute visualization  
-**Output**: High-quality visualizations + 3D structure  
-**Confidence**: 92.2% overall (near-experimental accuracy)  
+We provide **5 comprehensive demos** showcasing different aspects of Boltz1's capabilities:
+
+| Demo | System Type | Key Features | Confidence | Runtime |
+|------|-------------|--------------|------------|---------|
+| **Protein-Ligand Complex** | Multi-modal complex | CCD + SMILES ligands | 92.2% | 3 min |
+| **Single Protein** | Monomer | Basic structure prediction | 81.1% | 30 sec |
+| **Protein Multimer** | Protein-protein complex | Interface prediction | 82.5% | 1 min |
+| **Custom MSA** | MSA quality comparison | Pre-computed vs server | 69.1% | 25 sec |
+| **Pocket Constraints** | Constrained docking | Spatial constraints | TBD | TBD |  
 
 ## Prerequisites
 
@@ -21,18 +26,46 @@ uv pip install matplotlib seaborn biopython
 ```
 
 ### Files Required
-- `examples/ligand.yaml` - Input specification
-- `examples/msa/seq1.a3m` - Pre-computed MSA
+All demos use example files from the `examples/` directory:
+- `examples/ligand.yaml` - Protein-ligand complex
+- `examples/prot.yaml` - Single protein
+- `examples/multimer.yaml` - Protein multimer
+- `examples/prot_custom_msa.yaml` - Custom MSA protein
+- `examples/pocket.yaml` - Pocket constraints
+- `examples/msa/seq1.a3m`, `examples/msa/seq2.a3m` - Pre-computed MSAs
 - `symmetry.pkl` - Downloaded from Boltz S3 bucket
 
-## Step 1: Run Boltz1 Inference
+## Demo Structure
+
+All demos follow a consistent structure:
+```
+demos/
+├── protein_ligand_complex/     # Original demo (moved)
+├── single_protein/             # Basic protein folding
+├── protein_multimer/           # Protein-protein interactions
+├── custom_msa/                 # MSA quality comparison
+└── pocket_constraints/         # Constrained predictions
+```
+
+Each demo contains:
+- `README.md` - Detailed explanation and results
+- `visualize_*.py` - Custom visualization script
+- `output/` - Prediction results and structures
+- `*.png` - Generated visualization files
+
+# Individual Demo Instructions
+
+## Demo 1: Protein-Ligand Complex (Original)
+
+**Location**: `demos/protein_ligand_complex/`  
+**Highlights**: Multi-modal input, excellent confidence (92.2%)
 
 ```bash
-# Create output directory
-mkdir -p demo_output
+cd demos/protein_ligand_complex
+source ../../.venv/bin/activate
 
 # Run prediction (takes ~3 minutes)
-boltz predict examples/ligand.yaml --use_msa_server --out_dir demo_output
+boltz predict ../../examples/ligand.yaml --use_msa_server --out_dir demo_output
 ```
 
 **Expected Output Structure:**
@@ -45,106 +78,212 @@ demo_output/boltz_results_ligand/
 └── processed/                      # Intermediate files
 ```
 
-## Step 2: Generate Visualizations
-
-### Create Visualization Script
-The complete visualization script is saved as `visualize_demo_simple.py` with the following capabilities:
-
-```python
-# Key functions in visualize_demo_simple.py:
-- create_confidence_plot()     # Detailed 4-panel confidence analysis
-- create_summary_figure()      # Clean presentation summary
-- create_comparison_chart()    # Performance vs other methods
-```
-
-### Run Visualization
-```bash
+# Run visualization
 python visualize_demo_simple.py
 ```
 
-**Generated Files:**
-- `demo_confidence_detailed.png` - 4-panel detailed analysis (492KB, 300 DPI)
-- `demo_confidence_summary.png` - Clean summary slide (359KB, 300 DPI)  
-- `demo_comparison_chart.png` - Performance comparison (228KB, 300 DPI)
+**Key Results:**
+- 92.2% overall confidence (near-experimental accuracy)
+- Excellent protein-ligand binding prediction (94.4% iPTM)
+- Multi-modal input: CCD codes + SMILES strings
 
-## What This Demo Predicts
+## Demo 2: Single Protein Structure
 
-### Input System (`examples/ligand.yaml`)
-**Complex Type**: Methyltransferase enzyme with cofactor and substrate
+**Location**: `demos/single_protein/`  
+**Highlights**: Basic protein folding, foundation of structural biology
 
-**Components**:
-1. **Protein** (465 amino acids, chains A & B):
-   - Methyltransferase enzyme sequence
-   - Uses MSA from `examples/msa/seq1.a3m`
-   
-2. **SAH Ligand** (chains C & D):
-   - S-adenosyl-L-homocysteine cofactor
-   - Loaded from CCD database: `ccd: SAH`
-   
-3. **Tyrosine Ligand** (chains E & F):
-   - Amino acid substrate/inhibitor
-   - Defined by SMILES: `N[C@@H](Cc1ccc(O)cc1)C(=O)O`
+```bash
+cd demos/single_protein
+source ../../.venv/bin/activate
 
-### Biological Significance
-- **Enzyme Class**: Methyltransferase (crucial for DNA methylation)
-- **Drug Target**: Important for cancer and neurological disease research
-- **Application**: Structure-based drug design and optimization
+# Run prediction (takes ~30 seconds)
+boltz predict ../../examples/prot.yaml --use_msa_server --out_dir output
 
-## Key Results to Highlight
-
-### Confidence Scores (from `confidence_ligand_model_0.json`)
-```json
-{
-    "confidence_score": 92.2%,        # Overall prediction quality
-    "ptm": 93.5%,                     # Protein structure accuracy  
-    "iptm": 94.4%,                    # Protein-ligand binding confidence
-    "ligand_iptm": 97.5%,             # Ligand modeling accuracy
-    "complex_plddt": 91.7%,           # Complex-wide confidence
-}
+# Generate visualizations
+python visualize_protein.py
 ```
 
-### Performance Benchmarks
-- **Experimental Methods** (X-ray/NMR): 95-99% accuracy
-- **Boltz1 This Demo**: 92.2% accuracy ⭐
-- **Traditional Computational**: 70-85% accuracy
+**Key Results:**
+- 81.1% overall confidence (good quality prediction)
+- Single chain, 120 amino acids
+- Demonstrates core protein folding capability
 
-## Presentation Strategy
+## Demo 3: Protein Multimer Complex
 
-### Slide 1: Introduction
-**Title**: "Boltz1: State-of-the-Art Protein-Ligand Structure Prediction"
-- Show `examples/ligand.yaml` input
-- Highlight multi-modal capability (CCD + SMILES)
+**Location**: `demos/protein_multimer/`  
+**Highlights**: Protein-protein interactions, interface prediction
 
-### Slide 2: Results Summary  
-**Image**: `demo_confidence_summary.png`
-**Key Points**:
-- 92.2% overall confidence
-- Near-experimental accuracy
-- 3-minute runtime vs weeks in lab
-
-### Slide 3: Detailed Analysis
-**Image**: `demo_confidence_detailed.png`
-**Key Points**:
-- Per-chain analysis
-- Inter-chain interaction matrix
-- Comprehensive quality metrics
-
-### Slide 4: Competitive Performance
-**Image**: `demo_comparison_chart.png`
-**Key Points**:
-- Rivals experimental methods
-- Outperforms traditional computational approaches
-- Ready for drug discovery applications
-
-### Slide 5: 3D Structure (Live Demo)
 ```bash
-# Open 3D structure for interactive viewing
-pymol demo_output/boltz_results_ligand/predictions/ligand/ligand_model_0.cif
+cd demos/protein_multimer
+source ../../.venv/bin/activate
 
-# Or use online viewers:
-# - ChimeraX
+# Run prediction (takes ~1 minute)
+boltz predict ../../examples/multimer.yaml --use_msa_server --out_dir output
+
+# Generate visualizations
+python visualize_multimer.py
+```
+
+**Key Results:**
+- 82.5% overall confidence (excellent complex prediction)
+- **83.6% iPTM** - Outstanding protein-protein interface prediction
+- Two-chain complex with asymmetric quality (91.3% vs 73.5%)
+
+## Demo 4: Custom MSA Comparison
+
+**Location**: `demos/custom_msa/`  
+**Highlights**: MSA quality impact on prediction accuracy
+
+```bash
+cd demos/custom_msa
+source ../../.venv/bin/activate
+
+# Run prediction with custom MSA (takes ~25 seconds)
+boltz predict prot_custom_msa_fixed.yaml --out_dir output
+
+# Generate comparative visualizations  
+python visualize_custom_msa.py
+```
+
+**Key Results:**
+- 69.1% overall confidence (moderate quality)
+- **12% lower** than MSA server (demonstrates MSA importance)
+- Same protein as single_protein demo for direct comparison
+
+## Demo 5: Pocket Constraints
+
+**Location**: `demos/pocket_constraints/`  
+**Status**: In development (large protein requires extended runtime)
+
+# Quick Demo Comparison
+
+| Demo | Best For | Runtime | Key Insight |
+|------|----------|---------|-------------|
+| **Protein-Ligand** | Drug discovery presentations | 3 min | Multi-modal excellence |
+| **Single Protein** | Basic folding concepts | 30 sec | Foundation demonstration |
+| **Multimer** | PPI and complexes | 1 min | Interface prediction strength |
+| **Custom MSA** | Technical discussions | 25 sec | MSA quality importance |
+
+# Visualization Gallery
+
+Each demo generates publication-quality visualizations tailored to its biological system:
+
+### Protein-Ligand Complex
+- `demo_confidence_detailed.png` - 4-panel analysis with interaction matrix
+- `demo_confidence_summary.png` - Clean presentation summary
+- `demo_metric_breakdown.png` - Primary vs complex metrics
+
+### Single Protein
+- `protein_summary.png` - Summary with gauge-style confidence visualization
+- `protein_detailed.png` - Detailed horizontal bar analysis
+
+### Protein Multimer
+- `multimer_summary.png` - Complete 4-panel analysis with chain interaction matrix
+- `multimer_interactions.png` - Detailed protein-protein interaction breakdown
+
+### Custom MSA
+- `msa_comparison.png` - Side-by-side MSA server vs custom MSA comparison
+- `msa_performance_analysis.png` - Detailed performance breakdown with quality bands
+
+# Biological Systems Overview
+
+## Protein-Ligand Complex (`examples/ligand.yaml`)
+**System**: Methyltransferase enzyme with cofactor and substrate
+- **Protein**: 465 amino acids (chains A & B) - Methyltransferase enzyme
+- **SAH Ligand**: S-adenosyl-L-homocysteine cofactor (CCD: SAH)
+- **Tyrosine Ligand**: Amino acid substrate (SMILES string)
+- **Application**: DNA methylation, cancer research, drug design
+
+## Single Protein (`examples/prot.yaml`)
+**System**: Single-domain protein
+- **Protein**: 120 amino acids - Compact globular protein
+- **Application**: Basic protein folding, structural analysis
+
+## Protein Multimer (`examples/multimer.yaml`)
+**System**: Two-chain protein complex
+- **Chain A**: 108 amino acids - His-tagged construct
+- **Chain B**: 127 amino acids - Binding partner
+- **Application**: Protein-protein interactions, enzyme complexes
+
+## Custom MSA (`examples/prot_custom_msa.yaml`)
+**System**: Same as single protein but with pre-computed MSA
+- **Protein**: Identical 120 amino acid sequence
+- **MSA**: Pre-computed from `examples/msa/seq2.a3m`
+- **Application**: MSA quality analysis, technical validation
+
+# Performance Summary
+
+## Confidence Score Comparison
+
+| Demo | Overall | PTM | iPTM | Key Strength |
+|------|---------|-----|------|--------------|
+| **Protein-Ligand** | 92.2% | 93.5% | 94.4% | Multi-modal excellence |
+| **Protein Multimer** | 82.5% | 81.1% | 83.6% | Interface prediction |
+| **Single Protein** | 81.1% | 77.8% | N/A | Basic folding |
+| **Custom MSA** | 69.1% | 63.5% | N/A | MSA dependency |
+
+## Quality Interpretation
+- **90%+**: Excellent - Near experimental accuracy
+- **80-90%**: Very Good - Suitable for most applications  
+- **70-80%**: Good - Reliable for structural analysis
+- **60-70%**: Moderate - Use with caution
+- **<60%**: Poor - Not recommended for critical applications
+
+# Presentation Strategies
+
+## For Different Audiences
+
+### For Drug Discovery (Protein-Ligand Demo)
+**Best Demo**: `demos/protein_ligand_complex/`
+- **Opening**: "92.2% confidence rivals experimental methods"
+- **Key Visual**: `demo_confidence_summary.png`
+- **Live Demo**: 3D structure in PyMOL showing binding site
+- **Closing**: "3 minutes vs weeks in the lab"
+
+### For Structural Biology (Multimer Demo)  
+**Best Demo**: `demos/protein_multimer/`
+- **Opening**: "83.6% iPTM for protein-protein interfaces"
+- **Key Visual**: `multimer_summary.png` interaction matrix
+- **Technical Point**: Asymmetric chain quality analysis
+- **Closing**: "Predicts complex assembly accurately"
+
+### For Technical Validation (MSA Comparison)
+**Best Demo**: `demos/custom_msa/`
+- **Opening**: "MSA quality impacts prediction by 12%"
+- **Key Visual**: `msa_comparison.png` side-by-side
+- **Technical Point**: Evolutionary information importance
+- **Closing**: "Quality control matters for accuracy"
+
+### For General Audience (Single Protein)
+**Best Demo**: `demos/single_protein/`
+- **Opening**: "From sequence to structure in 30 seconds"
+- **Key Visual**: `protein_summary.png` gauge visualization
+- **Simple Point**: "Folding proteins computationally"
+- **Closing**: "Foundation of computational biology"
+
+## Multi-Demo Presentation Flow
+
+### Comprehensive 15-Minute Presentation
+1. **Intro** (2 min): Single protein demo - establish foundation
+2. **Complexity** (5 min): Multimer demo - show advanced capabilities  
+3. **Applications** (5 min): Protein-ligand demo - real-world impact
+4. **Technical** (3 min): MSA comparison - quality importance
+
+### Quick 5-Minute Demo
+- **Focus**: Protein-ligand complex only
+- **Highlight**: 92.2% confidence, multi-modal input
+- **Live Demo**: 3D structure visualization
+- **Impact**: Drug discovery applications
+
+## 3D Structure Visualization
+```bash
+# For any demo, open the 3D structure:
+pymol [demo_folder]/output/*/predictions/*/[structure_file].cif
+
+# Online viewers (upload CIF file):
+# - ChimeraX (chimerax.ucsd.edu)
 # - Mol* (molstar.org)
-# - NGL Viewer
+# - NGL Viewer (nglviewer.org)
 ```
 
 ## Troubleshooting
@@ -169,25 +308,46 @@ pymol demo_output/boltz_results_ligand/predictions/ligand/ligand_model_0.cif
    # The example is already optimized for single-GPU inference
    ```
 
-## File Locations Reference
+# File Structure Reference
 
-### Input Files
-- **Main Input**: `examples/ligand.yaml`
-- **MSA Data**: `examples/msa/seq1.a3m`
-- **Symmetry**: `symmetry.pkl` (root directory)
+## Demo Organization
+```
+demos/
+├── protein_ligand_complex/          # Multi-modal complex (92.2%)
+│   ├── demo_output/                 # Original demo results
+│   ├── visualize_demo_simple.py     # Multi-modal visualization
+│   ├── demo_confidence_detailed.png
+│   ├── demo_confidence_summary.png
+│   └── demo_metric_breakdown.png
+├── single_protein/                  # Basic folding (81.1%)  
+│   ├── output/                      # Prediction results
+│   ├── visualize_protein.py         # Single protein visualization
+│   ├── protein_summary.png
+│   └── protein_detailed.png
+├── protein_multimer/                # Protein-protein (82.5%)
+│   ├── output/                      # Complex prediction results
+│   ├── visualize_multimer.py        # Multimer visualization
+│   ├── multimer_summary.png
+│   └── multimer_interactions.png
+├── custom_msa/                      # MSA comparison (69.1%)
+│   ├── output/                      # Custom MSA results
+│   ├── prot_custom_msa_fixed.yaml   # Fixed input file
+│   ├── visualize_custom_msa.py      # MSA comparison visualization
+│   ├── msa_comparison.png
+│   └── msa_performance_analysis.png
+└── pocket_constraints/              # Constrained prediction (TBD)
+    └── output/                      # In development
+```
 
-### Output Files
-- **3D Structure**: `demo_output/boltz_results_ligand/predictions/ligand/ligand_model_0.cif`
-- **Confidence**: `demo_output/boltz_results_ligand/predictions/ligand/confidence_ligand_model_0.json`
-
-### Visualization Files  
-- **Detailed Analysis**: `demo_confidence_detailed.png`
-- **Summary**: `demo_confidence_summary.png`
-- **Comparison**: `demo_comparison_chart.png`
-
-### Scripts
-- **Visualization**: `visualize_demo_simple.py`
-- **This Guide**: `DEMO_REPRODUCTION_GUIDE.md`
+## Key Input Files
+- `examples/ligand.yaml` - Protein-ligand complex with CCD + SMILES
+- `examples/prot.yaml` - Single protein (120 AA)
+- `examples/multimer.yaml` - Two-chain complex (108 + 127 AA)
+- `examples/prot_custom_msa.yaml` - Single protein with custom MSA
+- `examples/pocket.yaml` - Large protein with constraints (1000+ AA)
+- `examples/msa/seq1.a3m` - Pre-computed MSA for ligand demo
+- `examples/msa/seq2.a3m` - Pre-computed MSA for custom MSA demo
+- `symmetry.pkl` - Required symmetry file (root directory)
 
 ## Extending the Demo
 
