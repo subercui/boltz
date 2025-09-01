@@ -56,6 +56,20 @@ boltz predict --help
 ```
 
 ### Training
+
+#### Official Two-Stage Structure Training (H200 Optimized)
+```bash
+# Stage 1: Early training (68 epochs, 384/3456 crop, PDB+OpenFold)
+python scripts/train/train.py scripts/train/configs/h200_4gpu_structure_stage1.yaml
+
+# Stage 2: Final training (19 epochs, 512/4608 crop, PDB only)  
+python scripts/train/train.py scripts/train/configs/h200_4gpu_structure_stage2.yaml
+
+# Full model training (structure + confidence)
+python scripts/train/train.py scripts/train/configs/h200_4gpu_full.yaml
+```
+
+#### Original Training Commands
 ```bash
 # Train with full configuration
 python scripts/train/train.py configs/full.yaml

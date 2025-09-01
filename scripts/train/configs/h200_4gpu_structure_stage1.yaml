@@ -1,19 +1,18 @@
 trainer:
   accelerator: gpu
   devices: 4  # Use all 4 H200 GPUs
-  # strategy: ddp_find_unused_parameters_true  # DDP for multi-GPU
   precision: bf16-mixed  # Mixed precision for maximum efficiency
   gradient_clip_val: 10.0
-  max_epochs: -1
-  accumulate_grad_batches: 128  # Official setting, 512 total effective batch size
+  max_epochs: 68  # ~53k gradient steps (53k × 128 batch = 6.784M samples ÷ 100k per epoch)
+  accumulate_grad_batches: 8  # 128 effective batch size (4 GPUs × 4 batch × 8 accum)
 
-# Structure training wandb logging
+# Stage 1 wandb logging
 wandb:
-  name: h200-4gpu-structure
+  name: h200-4gpu-structure-stage1
   project: boltz-structure
   entity: haotian
 
-output: ./checkpoints/h200_4gpu_structure
+output: ./checkpoints/h200_4gpu_structure_stage1
 pretrained: null
 resume: null
 disable_checkpoint: false
@@ -21,7 +20,7 @@ matmul_precision: high  # Optimize for H200 tensor cores
 save_top_k: 10
 
 data:
-  # Dual dataset setup like official training (PDB + OpenFold distillation)
+  # STAGE 1: Dual dataset setup (PDB + OpenFold equally)
   datasets:
     - _target_: boltz.data.module.training.DatasetConfig
       target_dir: ./rcsb_processed_targets
@@ -53,7 +52,7 @@ data:
       date: "2021-09-30"
       ref: released
     - _target_: boltz.data.filter.dynamic.resolution.ResolutionFilter
-      resolution: 9.0  # Structure-only resolution (vs 4.0 for full)
+      resolution: 9.0  # Structure-only resolution
 
   tokenizer:
     _target_: boltz.data.tokenize.boltz.BoltzTokenizer
@@ -61,16 +60,16 @@ data:
     _target_: boltz.data.feature.featurizer.BoltzFeaturizer
 
   symmetries: ./symmetry.pkl
-  # Official production settings - maximize H200 memory usage
-  max_tokens: 512   # Official setting
-  max_atoms: 4608   # Official setting  
-  max_seqs: 2048    # Official setting
+  # STAGE 1: Smaller crop size for early training
+  max_tokens: 384   # Stage 1 setting (vs 512 in stage 2)
+  max_atoms: 3456   # Stage 1 setting (384 * 9)
+  max_seqs: 2048
   pad_to_max_tokens: true
   pad_to_max_atoms: true
   pad_to_max_seqs: true
   samples_per_epoch: 100000  # Official setting
-  batch_size: 4  # Per GPU, so 16 total across GPUs
-  num_workers: 32  # 8 workers per GPU for maximum data loading
+  batch_size: 4  # Per GPU (4 GPUs × 4 batch × 8 accum = 128 effective)
+  num_workers: 32  # 8 workers per GPU
   random_seed: 42
   pin_memory: true
   overfit: null
@@ -117,7 +116,7 @@ model:
     offload_to_cpu: false
 
   pairformer_args:
-    num_blocks: 48  # Full 48 blocks like original
+    num_blocks: 48
     num_heads: 16
     dropout: 0.25
     activation_checkpointing: true
@@ -152,7 +151,7 @@ model:
 
   training_args:
     recycling_steps: 3
-    sampling_steps: 20  # Structure-only (vs 200 for full)
+    sampling_steps: 20  # Structure-only training
     diffusion_multiplicity: 16
     diffusion_samples: 2
     confidence_loss_weight: 1e-4
@@ -196,5 +195,3 @@ model:
     add_smooth_lddt_loss: true
     nucleotide_loss_weight: 5.0
     ligand_loss_weight: 10.0
-
-
