@@ -1,7 +1,7 @@
 trainer:
   accelerator: gpu
   devices: 4  # Use all 4 H200 GPUs
-  strategy: ddp_find_unused_parameters_true  # DDP for multi-GPU
+  # strategy: ddp_find_unused_parameters_true  # DDP for multi-GPU
   precision: bf16-mixed  # Mixed precision for maximum efficiency
   gradient_clip_val: 10.0
   max_epochs: -1
@@ -11,14 +11,14 @@ trainer:
 wandb:
   name: h200-4gpu-structure
   project: boltz-structure
-  entity: boltz
+  entity: haotian
 
 output: ./checkpoints/h200_4gpu_structure
 pretrained: null
 resume: null
 disable_checkpoint: false
 matmul_precision: high  # Optimize for H200 tensor cores
-save_top_k: -1
+save_top_k: 10
 
 data:
   # Dual dataset setup like official training (PDB + OpenFold distillation)
@@ -69,7 +69,7 @@ data:
   pad_to_max_atoms: true
   pad_to_max_seqs: true
   samples_per_epoch: 100000  # Official setting
-  batch_size: 1  # Per GPU, so 4 total across GPUs
+  batch_size: 4  # Per GPU, so 16 total across GPUs
   num_workers: 32  # 8 workers per GPU for maximum data loading
   random_seed: 42
   pin_memory: true
@@ -163,7 +163,7 @@ model:
     adam_eps: 0.00000001
     lr_scheduler: af3
     base_lr: 0.0
-    max_lr: 0.0072  # Scaled for 4x larger effective batch size (512 vs 128)
+    max_lr: 0.0018  # using the original now, check whether this needs to scale up 4 times
     lr_warmup_no_steps: 1000
     lr_start_decay_after_n_steps: 50000
     lr_decay_every_n_steps: 50000
@@ -197,10 +197,4 @@ model:
     nucleotide_loss_weight: 5.0
     ligand_loss_weight: 10.0
 
-  steering_args:
-    fk_steering: true
-    num_particles: 3
-    fk_lambda: 4.0
-    fk_resampling_interval: 3
-    guidance_update: true
-    num_gd_steps: 16
+

@@ -1,17 +1,17 @@
 trainer:
   accelerator: gpu
   devices: 4  # Use all 4 H200 GPUs
-  strategy: ddp_find_unused_parameters_true  # DDP for multi-GPU
+  # strategy: ddp_find_unused_parameters_true  # DDP for multi-GPU
   precision: bf16-mixed  # Mixed precision for efficiency
   gradient_clip_val: 10.0
   max_epochs: -1
-  accumulate_grad_batches: 32  # 128 total effective batch size across 4 GPUs
+  accumulate_grad_batches: 64  # 128 total effective batch size across 4 GPUs
 
 # Wandb logging for monitoring
 wandb:
   name: h200-4gpu-test
   project: boltz-h200
-  entity: boltz
+  entity: haotian
 
 output: ./checkpoints/h200_4gpu_test
 pretrained: null
@@ -50,14 +50,14 @@ data:
     _target_: boltz.data.feature.featurizer.BoltzFeaturizer
 
   symmetries: ./symmetry.pkl
-  max_tokens: 1024  # Larger due to 4x GPU memory
-  max_atoms: 9216   # Scaled accordingly (1024 * 9)
+  max_tokens: 512  # Original setting
+  max_atoms: 4608  # Original setting
   max_seqs: 2048
   pad_to_max_tokens: true
   pad_to_max_atoms: true
   pad_to_max_seqs: true
   samples_per_epoch: 2000  # Small for testing
-  batch_size: 1  # Per GPU, so 4 total
+  batch_size: 4  # Per GPU, so 8 total (since single GPU handles 2)
   num_workers: 16  # 4 workers per GPU
   random_seed: 42
   pin_memory: true
@@ -185,10 +185,4 @@ model:
     nucleotide_loss_weight: 5.0
     ligand_loss_weight: 10.0
 
-  steering_args:
-    fk_steering: true
-    num_particles: 3
-    fk_lambda: 4.0
-    fk_resampling_interval: 3
-    guidance_update: true
-    num_gd_steps: 16
+

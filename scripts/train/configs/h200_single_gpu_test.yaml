@@ -49,14 +49,14 @@ data:
     _target_: boltz.data.feature.featurizer.BoltzFeaturizer
 
   symmetries: ./symmetry.pkl
-  max_tokens: 768  # Larger than original due to H200 memory
-  max_atoms: 6912  # Scaled accordingly
+  max_tokens: 512  # Original setting
+  max_atoms: 4608  # Original setting
   max_seqs: 2048
   pad_to_max_tokens: true
   pad_to_max_atoms: true
   pad_to_max_seqs: true
   samples_per_epoch: 1000  # Small for testing
-  batch_size: 2
+  batch_size: 2  # using 79 GB memory
   num_workers: 8
   random_seed: 42
   pin_memory: true
@@ -183,11 +183,3 @@ model:
     add_smooth_lddt_loss: true
     nucleotide_loss_weight: 5.0
     ligand_loss_weight: 10.0
-
-  steering_args:
-    fk_steering: true
-    num_particles: 3
-    fk_lambda: 4.0
-    fk_resampling_interval: 3
-    guidance_update: true
-    num_gd_steps: 16
